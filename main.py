@@ -1,119 +1,157 @@
 import streamlit as st
-from typing import Dict, List, Optional, Tuple
-import random
+from pathlib import Path
+from typing import Dict, Optional, List
 import json
-import logging
+import os
+import random
 from datetime import datetime
 from pydantic import BaseModel, Field
-import os
-import uuid
+from uuid import uuid4
 
 # Setup logging
+import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Mock ChatGPT API (You can replace with actual API call)
-def mock_chatgpt_api(prompt: str) -> str:
-    """Simulate a ChatGPT API response."""
-    logger.info(f"Mock ChatGPT API called with prompt: {prompt}")
-    return f"Mock response for: '{prompt}'"
 
-# Pydantic models for data storage
+# Pydantic model for session storage
 class ChatSession(BaseModel):
     session_id: str
+    password: str
     group: str
     prompts: List[str]
     responses: List[str]
     timestamp: datetime = Field(default_factory=datetime.now)
 
-class UserSessionData(BaseModel):
-    session_id: str
-    group: str
-    prompts: List[str]
-    responses: List[str]
-    timestamp: datetime
 
 # Session state keys
 SESSION_ID_KEY = "session_id"
+PASSWORD_KEY = "password"
 GROUP_KEY = "group"
 PROMPTS_KEY = "prompts"
 RESPONSES_KEY = "responses"
+SESSION_DIR = "chat_sessions"
 
 # Configuration
-PASSCODE = "secret123"
-OUTPUT_DIR = "chat_sessions"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+PASSWORD_FILE = Path("passwords.txt")
+DATA_DIR = Path("data")
+os.makedirs(SESSION_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
-def authenticate_user(passcode: str) -> bool:
-    """Validate user passcode."""
-    return passcode == PASSCODE
 
-def assign_group() -> str:
-    """Randomly assign the user to 'control' or 'test' group."""
-    return random.choice(["control", "test"])
+def check_password(word):
+    """Check if password is valid."""
+    with PASSWORD_FILE.open('r') as pass_file:
+        contents = pass_file.read().splitlines()
+    if word in contents:
+        return word
+    else:
+        return False
 
-def save_session(session_data: UserSessionData) -> None:
-    """Save user session data to a JSON file."""
-    file_path = os.path.join(OUTPUT_DIR, f"{session_data.session_id}.json")
+
+def get_group(password: str) -> Optional[str]:
+    """Get or assign the group for a user."""
+    folders = [f for f in DATA_DIR.iterdir() if f.is_dir()]
+    users = [f.name.rsplit('_', 1)[0] for f in folders]
+    pattern = f"{password}_*"
+    if password in users:
+        path = [f for f in DATA_DIR.glob(pattern) if f.is_dir()][0]
+    else:
+        group = random.choice(["control", "test"])
+        path = Path(DATA_DIR) / f"{password}_{group}"
+        path.mkdir(parents=True, exist_ok=True)
+    return path, path.name.split("_")[-1]
+
+
+def mock_chatgpt_api(prompt: str) -> str:
+    """Simulate a ChatGPT API response."""
+    logger.info(f"Mock ChatGPT API called with prompt: {prompt}")
+    return f"Mock response for: '{prompt}'"
+
+
+def save_session(session: ChatSession) -> None:
+    """Save session data to file."""
+    file_path = os.path.join(SESSION_DIR, f"{session.session_id}.json")
     with open(file_path, "w") as f:
-        json.dump(session_data.dict(), f, indent=4)
-    logger.info(f"Saved session data for {session_data.session_id} in {file_path}")
+        json.dump(session.dict(), f, indent=4)
+    logger.info(f"Session saved for {session.session_id}")
 
-def load_session(session_id: str) -> Optional[UserSessionData]:
-    """Load a previous session if it exists."""
-    file_path = os.path.join(OUTPUT_DIR, f"{session_id}.json")
+
+def load_session(session_id: str) -> Optional[ChatSession]:
+    """Load session data from file."""
+    file_path = os.path.join(SESSION_DIR, f"{session_id}.json")
     if os.path.exists(file_path):
         with open(file_path, "r") as f:
             data = json.load(f)
-            return UserSessionData(**data)
+            return ChatSession(**data)
     return None
 
-def initialize_session() -> None:
-    """Initialize session state for a new user."""
-    session_id = str(uuid.uuid4())
-    group = assign_group()
-    st.session_state[SESSION_ID_KEY] = session_id
-    st.session_state[GROUP_KEY] = group
-    st.session_state[PROMPTS_KEY] = []
-    st.session_state[RESPONSES_KEY] = []
-    logger.info(f"New session initialized for {session_id} in {group} group")
 
-def get_modified_prompt(prompt: str) -> str:
-    """Return modified prompt for test group."""
-    return f"Please act as an assistant with empathy. User's question: {prompt}"
+def modify_prompt(prompt: str) -> str:
+    """Modify prompt for test group."""
+    return f"Please act with empathy. User's question: {prompt}"
+
 
 def main():
-    st.set_page_config(page_title="ChatGPT Experiment Interface", page_icon="🤖")
+    st.set_page_config(
+        page_title="ChatGPT Experiment Interface",
+        page_icon="🤖"
+    )
 
+    st.title("🤖 ChatGPT Experiment Interface")
     # Initialize session state
     if not st.session_state.get(SESSION_ID_KEY):
-        initialize_session()
+        st.session_state[SESSION_ID_KEY] = str(uuid4())
+        st.session_state[PASSWORD_KEY] = None
+        st.session_state[GROUP_KEY] = None
+        st.session_state[PROMPTS_KEY] = []
+        st.session_state[RESPONSES_KEY] = []
 
     session_id = st.session_state[SESSION_ID_KEY]
     group = st.session_state[GROUP_KEY]
     prompts = st.session_state[PROMPTS_KEY]
     responses = st.session_state[RESPONSES_KEY]
-
-    st.title("🤖 ChatGPT Experiment Interface")
+    password = st.session_state[PASSWORD_KEY]
 
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
         st.header("🔐 Authentication")
-        passcode = st.text_input("Enter passcode:", type="password")
+        input_password = st.text_input("Enter your password:", type="password")
         authenticate_button = st.button("Authenticate")
 
         if authenticate_button:
-            if authenticate_user(passcode):
+            if check_password(input_password):
+                path, group = get_group(input_password)
+                # Load previous session if exists
+                session_data = load_session(session_id)
+                if session_data:
+                    prompts = session_data.prompts
+                    responses = session_data.responses
+                else:
+                    prompts = []
+                    responses = []
+                # Update session state
                 st.session_state.authenticated = True
-                st.success("Authentication successful!")
+                st.session_state[PASSWORD_KEY] = input_password
+                st.session_state[GROUP_KEY] = group
+                st.session_state[PROMPTS_KEY] = prompts
+                st.session_state[RESPONSES_KEY] = responses
+                st.success(f"Authentication successful! You are in the '{group}' group.")
                 st.rerun()
             else:
-                st.error("Incorrect passcode. Please try again.")
+                st.error("Please enter a password.")
         return
 
-    st.success(f"Welcome! You are in the '{group}' group. Session ID: {session_id}")
+    st.success(f"Welcome back! You are in the '{group}' group. Session ID: {session_id}")
+
+    # Display chat history
+    st.subheader("Chat History")
+    for i in range(len(prompts)):
+        st.markdown(f"**You:** {prompts[i]}")
+        st.markdown(f"**Assistant:** {responses[i]}")
+        st.markdown("---")
 
     # Chat interface
     user_input = st.text_input("Enter your prompt:", key="user_input")
@@ -121,7 +159,7 @@ def main():
 
     if send_button and user_input:
         if group == "test":
-            modified_prompt = get_modified_prompt(user_input)
+            modified_prompt = modify_prompt(user_input)
         else:
             modified_prompt = user_input
 
@@ -133,17 +171,11 @@ def main():
         st.session_state[PROMPTS_KEY] = prompts
         st.session_state[RESPONSES_KEY] = responses
 
-    # Display chat history
-    st.subheader("📜 Chat History")
-    for i in range(len(prompts)):
-        st.markdown(f"**You:** {prompts[i]}")
-        st.markdown(f"**Assistant:** {responses[i]}")
-        st.markdown("---")
-
-    # Save session and exit
+    # Save and exit
     if st.button("Save and Exit"):
-        session_data = UserSessionData(
+        session_data = ChatSession(
             session_id=session_id,
+            password=st.session_state[PASSWORD_KEY],
             group=group,
             prompts=prompts,
             responses=responses,
@@ -156,3 +188,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
