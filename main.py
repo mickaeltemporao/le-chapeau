@@ -4,6 +4,7 @@ from typing import Dict, Optional, List
 import json
 import os
 import random
+import time
 from datetime import datetime
 from pydantic import BaseModel, Field
 from uuid import uuid4
@@ -77,14 +78,6 @@ def save_session(session: ChatSession) -> None:
     logger.info(f"Session saved for {session.session_id}")
 
 
-def load_session(session_id: str) -> Optional[ChatSession]:
-    """Load session data from file."""
-    file_path = os.path.join(SESSION_DIR, f"{session_id}.json")
-    if os.path.exists(file_path):
-        with open(file_path, "r") as f:
-            data = json.load(f)
-            return ChatSession(**data)
-    return None
 
 
 def modify_prompt(prompt: str) -> str:
@@ -125,7 +118,7 @@ def main():
             if check_password(input_password):
                 path, group = get_group(input_password)
                 # Load previous session if exists
-                session_data = load_session(session_id)
+                session_data = {}
                 if session_data:
                     prompts = session_data.prompts
                     responses = session_data.responses
@@ -146,45 +139,47 @@ def main():
 
     st.success(f"Welcome back! You are in the '{group}' group. Session ID: {session_id}")
 
-    # Display chat history
-    st.subheader("Chat History")
-    for i in range(len(prompts)):
-        st.markdown(f"**You:** {prompts[i]}")
-        st.markdown(f"**Assistant:** {responses[i]}")
-        st.markdown("---")
+    st.write("Streamlit loves LLMs! 🤖 [Build your own chat app](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps) in minutes, then make it powerful by adding images, dataframes, or even input widgets to the chat.")
+    st.caption("Note that this demo app isn't actually connected to any LLMs. Those are expensive ;)")
 
-    # Chat interface
-    user_input = st.text_input("Enter your prompt:", key="user_input")
-    send_button = st.button("Send")
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role": "assistant", "content": "Let's start chatting! 👇"}]
 
-    if send_button and user_input:
-        if group == "test":
-            modified_prompt = modify_prompt(user_input)
-        else:
-            modified_prompt = user_input
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-        response = mock_chatgpt_api(modified_prompt)
+    # Accept user input
+    if prompt := st.chat_input("What is up?"):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        # Display user message in chat message container
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-        prompts.append(user_input)
-        responses.append(response)
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            assistant_response = random.choice(
+                [
+                    "Hello there! How can I assist you today?",
+                    "Hi, human! Is there anything I can help you with?",
+                    "Do you need help?",
+                ]
+            )
+            # Simulate stream of response with milliseconds delay
+            for chunk in assistant_response.split():
+                full_response += chunk + " "
+                time.sleep(0.05)
+                # Add a blinking cursor to simulate typing
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-        st.session_state[PROMPTS_KEY] = prompts
-        st.session_state[RESPONSES_KEY] = responses
-
-    # Save and exit
-    if st.button("Save and Exit"):
-        session_data = ChatSession(
-            session_id=session_id,
-            password=st.session_state[PASSWORD_KEY],
-            group=group,
-            prompts=prompts,
-            responses=responses,
-            timestamp=datetime.now(),
-        )
-        save_session(session_data)
-        st.success("Session saved. Thank you for participating!")
-        st.session_state.authenticated = False
-        st.rerun()
 
 if __name__ == "__main__":
     main()
