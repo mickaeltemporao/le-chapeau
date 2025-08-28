@@ -1,7 +1,6 @@
 import os
 import random
 import streamlit as st
-import time
 
 from openai import OpenAI
 from pathlib import Path
@@ -25,6 +24,7 @@ PROMPT_MAP = {
     'c': """Act as a Emmanuel Macron.""",
 }
 
+
 os.makedirs(SESSION_DIR, exist_ok=True)
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -45,7 +45,7 @@ def get_group(password: str) -> Optional[str]:
     if password in users:
         path = [f for f in DATA_DIR.glob(pattern) if f.is_dir()][0]
     else:
-        group = random.choice(PROMPT_MAP.keys())
+        group = random.choice(list(PROMPT_MAP.keys()))
         path = Path(DATA_DIR) / f"{password}_{group}"
         path.mkdir(parents=True, exist_ok=True)
     return path.name.split("_")[-1]
@@ -63,7 +63,7 @@ def check_password(word):
 
 def stream_text(stream):
     for event in stream:
-        if event.type == "response.created":
+        if event.type == "response.completed":
             st.session_state["last_response_id"] = event.response.id
         elif event.type == "response.output_text.delta":
             yield event.delta
@@ -166,8 +166,8 @@ def main():
         # Display user message in chat message container
         with st.chat_message("user"):
             st.markdown(prompt)
-
-        get_response(prompt, st.session_state[GROUP_KEY], client)
+        with st.spinner("Thinking..."):
+            get_response(prompt, st.session_state[GROUP_KEY], client)
 
 if __name__ == "__main__":
     main()
