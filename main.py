@@ -4,7 +4,7 @@ import streamlit as st
 
 from openai import OpenAI
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Set
 from uuid import uuid4
 
 
@@ -12,21 +12,36 @@ from uuid import uuid4
 SESSION_ID_KEY = "session_id"
 USER_ID_KEY = "user_id"
 GROUP_KEY = "group"
-SESSION_DIR = "chat_sessions"
 TITLE = "Interface Prototype - LLM"
+# MODEL = "gpt-5-mini"
 MODEL = "gpt-4o-mini"
 PASSWORD_FILE = Path("passwords.txt")
-DATA_DIR = Path("data")
-
 PROMPT_MAP = {
-    'a': """Act as if you were Super Mario.""",
-    'b': """Act as if you were Batman.""",
-    'c': """Act as a Emmanuel Macron.""",
+    'a': "Act as if you were Angela Merkel",
+    'b': "Act as if you were Emmanuel Macron",
+    'c': "Act as if you were Ursula von der Leyen",
+    # 'a': """Act as if you were Super Mario.""",
+    # 'b': """Act as if you were Batman.""",
+    # 'c': """Act as a Emmanuel Macron.""",
 }
 
 
-os.makedirs(SESSION_DIR, exist_ok=True)
-os.makedirs(DATA_DIR, exist_ok=True)
+def load_passwords_and_groups() -> Dict[str, str]:
+    """Load passwords and their groups from file into a dictionary."""
+    passwords = {}
+    if PASSWORD_FILE.exists():
+        with PASSWORD_FILE.open('r') as pass_file:
+            for line in pass_file:
+                line = line.strip()
+                if line:
+                    password, group = line.split(',') if ',' in line else (line, None)
+                    passwords[password] = group
+    return passwords
+
+
+# Load passwords and groups at startup
+PASSWORDS: Dict[str, str] = load_passwords_and_groups()
+VALID_PASSWORDS: Set[str] = set(PASSWORDS.keys())
 
 
 def get_prompt_for_group(group: str, default=None):
@@ -38,27 +53,13 @@ def clean_input(user_name):
 
 
 def get_group(password: str) -> Optional[str]:
-    """Get or assign the group for a user."""
-    folders = [f for f in DATA_DIR.iterdir() if f.is_dir()]
-    users = [f.name.rsplit('_', 1)[0] for f in folders]
-    pattern = f"{password}_*"
-    if password in users:
-        path = [f for f in DATA_DIR.glob(pattern) if f.is_dir()][0]
-    else:
-        group = random.choice(list(PROMPT_MAP.keys()))
-        path = Path(DATA_DIR) / f"{password}_{group}"
-        path.mkdir(parents=True, exist_ok=True)
-    return path.name.split("_")[-1]
+    """Get the group for a user (already loaded in PASSWORDS)."""
+    return PASSWORDS.get(password)
 
 
 def check_password(word):
-    """Check if password is valid."""
-    with PASSWORD_FILE.open('r') as pass_file:
-        contents = pass_file.read().splitlines()
-    if word in contents:
-        return word
-    else:
-        return False
+    """Check if password is valid (in-memory)."""
+    return word in VALID_PASSWORDS
 
 
 def stream_text(stream):
@@ -69,7 +70,7 @@ def stream_text(stream):
             yield event.delta
 
 
-def get_response(user_input, group, client):
+def get_response(user, user_input, group, client):
     dev_prompt = get_prompt_for_group(group)
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
@@ -89,10 +90,11 @@ def get_response(user_input, group, client):
                             "text": user_input,
                         },
                     ]
-                }
+                },
             ],
             stream=True,
             previous_response_id=st.session_state["last_response_id"],
+            metadata={"user": user, "group": group},
         ) as stream:
             response = st.write_stream(
                 stream_text(stream)
@@ -137,10 +139,12 @@ def main():
         return
 
     st.success(
-        f"Bonjour {st.session_state[USER_ID_KEY]}, Tu es dans le groupe '{st.session_state[GROUP_KEY]}'!."
+        # f"Bonjour {st.session_state[USER_ID_KEY].title()}, Tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
+        f"Welcome {st.session_state[USER_ID_KEY].title()}, You ended up in group '{st.session_state[GROUP_KEY].upper()}'."
     )
-    st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
-    st.caption("Et surtout ... encore du blabla.")
+    # st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
+    st.write("Can you use the chat interface below to ask me a question?")
+    # st.caption("Et surtout ... encore du blabla.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -152,7 +156,8 @@ def main():
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Comment puis-je t'aider?"}
+            # {"role": "assistant", "content": "Comment puis-je t'aider?"}
+            {"role": "assistant", "content": "How can I help you?"}
         ]
 
     # Display chat messages from history on app rerun
@@ -160,14 +165,20 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    if prompt := st.chat_input("Entrez votre requête ici..."):
+    # if prompt := st.chat_input("Entrez votre requête ici..."):
+    if prompt := st.chat_input("Enter you request here..."):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         # Display user message in chat message container
         with st.chat_message("user"):
             st.markdown(prompt)
         with st.spinner("Thinking..."):
-            get_response(prompt, st.session_state[GROUP_KEY], client)
+            get_response(
+                st.session_state[USER_ID_KEY],
+                prompt,
+                st.session_state[GROUP_KEY],
+                client
+            )
 
 if __name__ == "__main__":
     main()
