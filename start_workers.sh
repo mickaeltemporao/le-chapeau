@@ -24,3 +24,9 @@ for i in $(seq 0 $((WORKERS-1))); do
     # nohup $VENV_PATH run $APP_PATH --server.port $PORT --server.address 127.0.0.1 > worker_$PORT.log 2>&1 &
     nohup $VENV_PATH run $APP_PATH --server.port $PORT --server.address 0.0.0.0 > worker_$PORT.log 2>&1 &
 done
+
+# Get the local IP address (works for most Mac setups)
+LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n 1)
+
+# Print the local IP address
+echo "Your Streamlit app is running. Others can connect using the IP: $LOCAL_IP"

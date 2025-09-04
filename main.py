@@ -123,7 +123,7 @@ def main():
 
     if not st.session_state.authenticated:
         st.header("🔐 Authentication")
-        input_password = st.text_input("Enter your password:", type="password")
+        input_password = st.text_input(f"Enter your username: [Use one of the follwing {', '.join(PASSWORDS.keys())}]")
         authenticate_button = st.button("Authenticate")
 
         if authenticate_button:
@@ -142,6 +142,7 @@ def main():
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, Tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
         f"Welcome {st.session_state[USER_ID_KEY].title()}, You ended up in group '{st.session_state[GROUP_KEY].upper()}'."
     )
+    f"Enter your username: (You can try one of the follwing {PASSWORDS.keys()})"
     # st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
     st.write("Can you use the chat interface below to ask me a question?")
     # st.caption("Et surtout ... encore du blabla.")
