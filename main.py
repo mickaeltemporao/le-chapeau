@@ -12,17 +12,17 @@ from uuid import uuid4
 SESSION_ID_KEY = "session_id"
 USER_ID_KEY = "user_id"
 GROUP_KEY = "group"
-TITLE = "Interface Prototype - LLM"
+TITLE = "Le Chapeau"
 # MODEL = "gpt-5-mini"
 MODEL = "gpt-4o-mini"
 PASSWORD_FILE = Path("passwords.txt")
 PROMPT_MAP = {
-    'a': "Act as if you were Angela Merkel",
-    'b': "Act as if you were Emmanuel Macron",
-    'c': "Act as if you were Ursula von der Leyen",
-    # 'a': """Act as if you were Super Mario.""",
-    # 'b': """Act as if you were Batman.""",
-    # 'c': """Act as a Emmanuel Macron.""",
+    # 'a': "Act as if you were Angela Merkel",
+    # 'b': "Act as if you were Emmanuel Macron",
+    # 'c': "Act as if you were Ursula von der Leyen",
+    'a': """Act as if you were Super Mario.""",
+    'b': """Act as if you were Batman.""",
+    'c': """Act as if you were Tinker Bell.""",
 }
 
 
@@ -108,10 +108,10 @@ def main():
 
     st.set_page_config(
         page_title=f"{TITLE}",
-        page_icon="🤖"
+        page_icon="🎓"
     )
 
-    st.title(f"🤖 {TITLE}")
+    st.title(f"🎓 {TITLE}")
 
     # Initialize session state
     if not st.session_state.get(SESSION_ID_KEY):
@@ -122,9 +122,11 @@ def main():
         st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
-        st.header("🔐 Authentication")
-        input_password = st.text_input(f"Enter your username: [Use one of the follwing {', '.join(PASSWORDS.keys())}]")
-        authenticate_button = st.button("Authenticate")
+        st.header("🔐 Identification")
+
+        input_password = st.text_input("Entrez votre nom d'utilisateur", type="password")
+        st.write(f"Utilisez un des noms suivants: {', '.join(PASSWORDS.keys())}.")
+        authenticate_button = st.button("Se connecter")
 
         if authenticate_button:
             username = clean_input(input_password)
@@ -135,17 +137,16 @@ def main():
                 st.success(f"Authentication successful!")
                 st.rerun()
             else:
-                st.error("Please enter a password.")
+                st.error("Veuillez entrer votre nom d'utilisateur.")
         return
 
     st.success(
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, Tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
-        f"Welcome {st.session_state[USER_ID_KEY].title()}, You ended up in group '{st.session_state[GROUP_KEY].upper()}'."
+        f"Bienveue {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
     )
-    f"Enter your username: (You can try one of the follwing {PASSWORDS.keys()})"
-    # st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
-    st.write("Can you use the chat interface below to ask me a question?")
-    # st.caption("Et surtout ... encore du blabla.")
+    st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
+    # st.write("You use the chat interface below to ask me a question?")
+    st.caption("Et surtout ... encore du blabla.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -157,8 +158,7 @@ def main():
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            # {"role": "assistant", "content": "Comment puis-je t'aider?"}
-            {"role": "assistant", "content": "How can I help you?"}
+            {"role": "assistant", "content": "Comment puis-je t'aider?"}
         ]
 
     # Display chat messages from history on app rerun
@@ -166,8 +166,9 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # if prompt := st.chat_input("Entrez votre requête ici..."):
-    if prompt := st.chat_input("Enter you request here..."):
+    if prompt := st.chat_input(
+        "Enter you request here...",
+    ):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         # Display user message in chat message container
