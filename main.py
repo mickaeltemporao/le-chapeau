@@ -15,7 +15,8 @@ GROUP_KEY = "group"
 TITLE = "Le Chapeau"
 # MODEL = "gpt-5-mini"
 MODEL = "gpt-4o-mini"
-PASSWORD_FILE = Path("passwords.txt")
+# PASSWORD_FILE = Path("passwords.txt")
+PASSWORD_FILE = Path("users.txt")
 PROMPT_MAP = {
     # 'a': "Act as if you were Angela Merkel",
     # 'b': "Act as if you were Emmanuel Macron",
@@ -124,8 +125,20 @@ def main():
     if not st.session_state.authenticated:
         st.header("🔐 Identification")
 
-        input_password = st.text_input("Entrez votre nom d'utilisateur", type="password")
-        st.write(f"Utilisez un des noms suivants: {', '.join(PASSWORDS.keys())}.")
+        st.write(
+            """
+            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
+
+            **Exemple :**
+            Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**,
+            votre identifiant est **jeanne-marie.redon**.
+
+            Saisissez-le dans le champ ci-dessous, puis cliquez sur **"Se connecter"**.
+        """
+        )
+
+        input_password = st.text_input("Entrez votre identifiant", type="password")
+        # st.write(f"Utilisez un des noms suivants: {', '.join(PASSWORDS.keys())}.")
         authenticate_button = st.button("Se connecter")
 
         if authenticate_button:
@@ -134,10 +147,10 @@ def main():
                 st.session_state.authenticated = True
                 st.session_state[USER_ID_KEY] = username
                 st.session_state[GROUP_KEY] = get_group(username)
-                st.success(f"Authentication successful!")
+                st.success(f"Authentification réussie !")
                 st.rerun()
             else:
-                st.error("Veuillez entrer votre nom d'utilisateur.")
+                st.error("Veuillez entrer votre identifiant.")
         return
 
     st.success(
