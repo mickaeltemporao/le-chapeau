@@ -18,5 +18,5 @@ def process_emails(input_file, output_file):
 
 # Example usage:
 input_file = 'raw-sample.txt'  # Replace with your input file
-output_file = 'users_groups.txt'  # Replace with your desired output file
+output_file = 'users.txt'  # Replace with your desired output file
 process_emails(input_file, output_file)
