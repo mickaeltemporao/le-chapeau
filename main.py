@@ -155,11 +155,12 @@ def main():
 
     st.success(
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, Tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
-        f"Bienveue {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
+        # f"Bonjour {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
+        f"Bonjour {st.session_state[USER_ID_KEY].title()}."
     )
-    st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref beaucoup de blabla.")
+    st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref c'est de blabla.")
     # st.write("You use the chat interface below to ask me a question?")
-    st.caption("Et surtout ... encore du blabla.")
+    st.caption("Utilisez la boîte de dialogue en bas de page pour interagir avec cet outil.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
