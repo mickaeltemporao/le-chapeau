@@ -22,7 +22,7 @@ for i in $(seq 0 $((WORKERS-1))); do
     PORT=$((BASE_PORT+i))
     echo "Starting Streamlit worker on port $PORT"
     # nohup $VENV_PATH run $APP_PATH --server.port $PORT --server.address 127.0.0.1 > worker_$PORT.log 2>&1 &
-    nohup $VENV_PATH run $APP_PATH --server.port $PORT --server.address 0.0.0.0 > worker_$PORT.log 2>&1 &
+    nohup $VENV_PATH run $APP_PATH --server.port $PORT --server.address 127.0.0.1 > worker_$PORT.log 2>&1 &
 done
 
 # Get the local IP address (works for most Mac setups)

@@ -25,6 +25,26 @@ PROMPT_MAP = {
     'b': """Act as if you were Batman.""",
     'c': """Act as if you were Tinker Bell.""",
 }
+TEXT_ID = """
+            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
+
+            **Exemple :**
+            Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**,
+            votre identifiant est **jeanne-marie.redon**.
+
+            Saisissez-le dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
+"""
+TEXT_ID = """
+            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
+
+            **Exemple :**
+            Si votre adresse e-mail est **jeanne-marie.redon@scpobx.fr**,
+            votre identifiant est **jeanne-marie.redon**.
+
+            Saisissez-le dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
+"""
+
+
 
 
 def load_passwords_and_groups() -> Dict[str, str]:
@@ -125,17 +145,7 @@ def main():
     if not st.session_state.authenticated:
         st.header("🔐 Identification")
 
-        st.write(
-            """
-            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
-
-            **Exemple :**
-            Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**,
-            votre identifiant est **jeanne-marie.redon**.
-
-            Saisissez-le dans le champ ci-dessous, puis cliquez sur **"Se connecter"**.
-        """
-        )
+        st.write(TEXT_ID)
 
         input_password = st.text_input("Entrez votre identifiant", type="password")
         # st.write(f"Utilisez un des noms suivants: {', '.join(PASSWORDS.keys())}.")
