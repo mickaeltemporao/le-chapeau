@@ -1,5 +1,5 @@
 # socrates experiment
-ai for teachers &amp; students
+ai for teachers & students
 
 ## How to run
 
@@ -19,13 +19,15 @@ Get your ip
 Others can access though your ip in local network
 
 ## TODO
-- add secrets to API
-- add email passwords.txt 
-- double check logs are commited to api
-- add prompt files
-- add text badinter check & file
+- MAYBE add text badinter check & file
 
 GPT Suggestion for open files error
 *👉 Quick fix for testing with your 150 students:
     Before running streamlit run app.py, run
     ulimit -n 20000
+
+
+## Options
+
+- Host on web
+- Tunnel 

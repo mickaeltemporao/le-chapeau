@@ -1,6 +1,7 @@
 import os
 import random
 import streamlit as st
+from prompts import assist, mentor
 
 from openai import OpenAI
 from pathlib import Path
@@ -17,34 +18,30 @@ TITLE = "Le Chapeau"
 MODEL = "gpt-4o-mini"
 # PASSWORD_FILE = Path("passwords.txt")
 PASSWORD_FILE = Path("users.txt")
+PASSWORD_FILE = Path("users_spb.txt")
 PROMPT_MAP = {
-    # 'a': "Act as if you were Angela Merkel",
-    # 'b': "Act as if you were Emmanuel Macron",
-    # 'c': "Act as if you were Ursula von der Leyen",
-    'a': """Act as if you were Super Mario.""",
-    'b': """Act as if you were Batman.""",
-    'c': """Act as if you were Tinker Bell.""",
+    'a': "",
+    'b': assist,
+    'c': mentor,
+    # 'a': """Act as if you were Super Mario.""",
+    # 'b': """Act as if you were Batman.""",
+    # 'c': """Act as if you were Tinker Bell.""",
 }
 TEXT_ID = """
-            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
+            Votre identifiant est votre adresse e-mail étudiante.
 
             **Exemple :**
-            Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**,
-            votre identifiant est **jeanne-marie.redon**.
 
-            Saisissez-le dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
+            - Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**
+            - identifiant = **jeanne-marie.redon@etu.u-bordeaux.fr**
+
+            ⚠️ **Important :**
+
+            * ✅ `prenom-compose.nom@etu.u-bordeaux.fr` → correct
+            * ❌ `prenomcomposenom@etu.u-bordeaux.fr` → incorrect (il manque le tiret et le point)
+
+            Saisissez votre identifiant dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
 """
-TEXT_ID = """
-            Votre identifiant correspond à la partie de votre adresse e-mail étudiante **avant le symbole @**.
-
-            **Exemple :**
-            Si votre adresse e-mail est **jeanne-marie.redon@scpobx.fr**,
-            votre identifiant est **jeanne-marie.redon**.
-
-            Saisissez-le dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
-"""
-
-
 
 
 def load_passwords_and_groups() -> Dict[str, str]:
@@ -160,17 +157,17 @@ def main():
                 st.success(f"Authentification réussie !")
                 st.rerun()
             else:
-                st.error("Veuillez entrer votre identifiant.")
+                st.error("Veuillez entrer votre identifiant. ")
         return
 
     st.success(
-        # f"Bonjour {st.session_state[USER_ID_KEY].title()}, Tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
-        f"Bonjour {st.session_state[USER_ID_KEY].title()}."
+        f"""⚠️ Cet outil est expérimental, si la page venait à bugger, il suffit simplement de la rafraîchir ⚠️"""
     )
-    st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref c'est de blabla.")
+
+    # st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref c'est de blabla.")
     # st.write("You use the chat interface below to ask me a question?")
-    st.caption("Utilisez la boîte de dialogue en bas de page pour interagir avec cet outil.")
+    st.write("Bonjour, vous pouvez utiliser la boîte de dialogue en bas de page pour interagir avec cet outil.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
@@ -198,7 +195,8 @@ def main():
         # Display user message in chat message container
         with st.chat_message("user"):
             st.markdown(prompt)
-        with st.spinner("Thinking..."):
+        # with st.spinner("Thinking..."):
+        with st.spinner("En réflexion..."):
             get_response(
                 st.session_state[USER_ID_KEY],
                 prompt,
