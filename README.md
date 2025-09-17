@@ -31,3 +31,13 @@ GPT Suggestion for open files error
 
 - Host on web
 - Tunnel 
+
+## Locust Load Testing
+
+Run Locust pointing at your server:
+
+    locust -f locustfile.py --host http://82.66.51.22
+
+Open the Locust web UI at:
+
+    http://localhost:8089
