@@ -15,43 +15,23 @@ def load_results(file_path=RESULTS_FILE):
                 pass
     return pd.DataFrame(rows)
 
-def analyze(df: pd.DataFrame):
-    print("===== Basic Info =====")
-    print(df.info())
-    print("\nFirst few rows:")
-    print(df.head(), "\n")
-
-    # Latency stats
-    if "latency" in df.columns:
-        print("===== Latency (seconds) =====")
-        print(df["latency"].describe(), "\n")
-
-    # Error analysis
-    if "error" in df.columns:
-        errors = df["error"].dropna()
-        if not errors.empty:
-            print("===== Errors =====")
-            print(errors.value_counts().head(10), "\n")
-
-    # Status code distribution
-    if "status" in df.columns:
-        print("===== Status Codes =====")
-        print(df["status"].value_counts(), "\n")
-
-    # Group-level analysis
-    if "group" in df.columns and "latency" in df.columns:
-        print("===== Average Latency by Group =====")
-        print(df.groupby("group")["latency"].mean(), "\n")
-
-    # Response lengths (as proxy for richness)
-    if "response" in df.columns:
-        df["response_length"] = df["response"].dropna().apply(len)
-        print("===== Response Length (characters) =====")
-        print(df["response_length"].describe(), "\n")
+def analyze(df):
+    df['error'] = df['text'].str.contains("ERROR", case=False, na=False)
+    df["type"] = df[df['error']==True]['text'].str.extract(r'ERROR\s*(.*)')[0]
+    error_counts = df['type'].value_counts()
+    error_counts
+    # Count occurrences per group
+    group_counts = df[df['error']]['group'].value_counts()
+    print("Total Errors:", df['error'].sum())
+    print("\nError Counts:", error_counts)
+    print("\nGroup Counts:", group_counts)
 
 if __name__ == "__main__":
     df = load_results()
+    df[["user", "group", "text"]] = df["raw"].str.extract(r'^(.*?) \((.*?)\):\s*(.*)$')
     if df.empty:
         print("No results loaded. Did you run the simulation?")
     else:
-        analyze(df)
+        print(analyze(df))
+
+
