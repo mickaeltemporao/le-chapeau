@@ -1,28 +1,31 @@
-import asyncio
 import aiohttp
+import asyncio
+import json
 import random
-from pathlib import Path
+# import requests
 import streamlit as st
 
-API_URL = "https://api.openai.com/v1/chat/completions"
+from pathlib import Path
+from prompts import assist, mentor, bad_1, bad_2, bad_doc
+
+
+API_URL = "https://api.openai.com/v1/responses"
 API_KEY = st.secrets["OPENAI_API_KEY"]
 N = 500
+OUTPUT_FILE = "simulation_results.jsonl"
 
 student_prompts = [
     "Peux-tu m'expliquer le concept de la photosynthèse ?",
     "Comment résoudre une équation du second degré ?",
-    "Donne-moi un conseil pour mieux gérer mon temps en révisions.",
+    bad_1,
     "Peux-tu résumer le chapitre sur la Révolution française ?",
-    "Comment améliorer mes compétences en programmation Python ?",
-    "As-tu des astuces pour mémoriser du vocabulaire en anglais ?",
     "Explique-moi la différence entre masse et poids.",
     "Comment fonctionne le moteur d'une voiture ?",
     "Peux-tu me donner un exemple d'expérience scientifique simple à la maison ?",
-    "Quels sont les principes de base de l’économie ?"
+    bad_2,
+    "Quels sont les principes de base de l’économie ?",
+    bad_doc,
 ]
-
-# Reuse your prompt groups
-from prompts import assist, mentor
 
 PROMPT_MAP = {
     "a": "",
@@ -35,7 +38,7 @@ def load_users(file="users.txt"):
     users = []
     path = Path(file)
     if path.exists():
-        with path.open("r") as f:
+        with path.open("r",  encoding='utf-8-sig') as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -44,25 +47,32 @@ def load_users(file="users.txt"):
     return users
 
 
+
 async def simulate_user(session, user, group):
     await asyncio.sleep(random.uniform(0.1, 1.5))
     prompt = random.choice(student_prompts)
     payload = {
         "model": "gpt-4o-mini",
-        "messages": [
+        "input": [
             {"role": "developer", "content": PROMPT_MAP.get(group, "")},
             {"role": "user", "content": prompt},
         ],
-        "max_tokens": 50,
+        "metadata": {"user": user, "group": group},
     }
+    # print(json.dumps(payload, indent=2, ensure_ascii=False))
+
     headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
+
+    # response = requests.post(API_URL, headers=headers, json=payload)
+    # data = response.json()
+    # data["output"][0]["content"][0]['text'].strip()
 
     try:
         async with session.post(API_URL, headers=headers, json=payload) as resp:
             if resp.status != 200:
                 return f"{user} ({group}): ERROR {resp.status}"
             data = await resp.json()
-            return f"{user} ({group}): {data['choices'][0]['message']['content'].strip()}"
+            return f"{user} ({group}): {data["output"][0]["content"][0]['text'].strip()}"
     except Exception as e:
         return f"{user} ({group}): EXCEPTION {e}"
 
@@ -78,6 +88,17 @@ async def main():
         for r in results:
             print(r)
 
+    # Write results to file as JSONL
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        for r in results:
+            # If simulate_user returns metadata dict
+            if isinstance(r, dict):
+                f.write(json.dumps(r, ensure_ascii=False) + "\n")
+            else:
+                # In case it returns a string or exception
+                f.write(json.dumps({"raw": str(r)}) + "\n")
+
+    print(f"✅ Results written to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     asyncio.run(main())
