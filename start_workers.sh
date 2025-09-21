@@ -13,7 +13,12 @@ pkill -f "streamlit run $APP_PATH"
 ulimit -n 20000
 
 # Start a single worker on port 8501
-nohup $VENV_PATH run $APP_PATH --server.port 8501 --server.address 0.0.0.0 --server.headless true > worker_8501.log 2>&1 &
+nohup $VENV_PATH run $APP_PATH \
+  --server.port 8501 \
+  --server.address 0.0.0.0 \
+  --server.headless true \
+  --server.enableCORS false \
+  --server.enableXsrfProtection false > worker_8501.log 2>&1 &
 
 # Get the local IP address (LAN)
 LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n 1)
