@@ -18,7 +18,12 @@ nohup $VENV_PATH run $APP_PATH \
   --server.address 0.0.0.0 \
   --server.headless true \
   --server.enableCORS false \
-  --server.enableXsrfProtection false > worker_8501.log 2>&1 &
+  --server.enableXsrfProtection false \
+  --browser.gatherUsageStats false \
+  > worker_8501.log 2>&1 &
+
+# Detach completely
+disown
 
 # Get the local IP address (LAN)
 LOCAL_IP=$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -n 1)
@@ -29,4 +34,3 @@ PUBLIC_IP=$(curl -s ifconfig.me)
 echo "Your Streamlit app is running. Others can connect using the followin IPs."
 echo "Local Access  : http://$LOCAL_IP:8501"
 echo "Public Access : http://$PUBLIC_IP:8501"
-
