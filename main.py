@@ -14,18 +14,13 @@ SESSION_ID_KEY = "session_id"
 USER_ID_KEY = "user_id"
 GROUP_KEY = "group"
 TITLE = "Le Chapeau"
-# MODEL = "gpt-5-mini"
 MODEL = "gpt-4o-mini"
-# PASSWORD_FILE = Path("passwords.txt")
 PASSWORD_FILE = Path("users.txt")
 PASSWORD_FILE = Path("users_spb.txt")
 PROMPT_MAP = {
     'a': "",
     'b': assist,
     'c': mentor,
-    # 'a': """Act as if you were Super Mario.""",
-    # 'b': """Act as if you were Batman.""",
-    # 'c': """Act as if you were Tinker Bell.""",
 }
 TEXT_ID = """
             Votre identifiant est votre adresse e-mail étudiante.
@@ -165,8 +160,6 @@ def main():
         f"""⚠️ Cet outil est expérimental, si la page venait à bugger, il suffit simplement de la rafraîchir ⚠️"""
     )
 
-    # st.write("Bienvenue dans blabla 🚗 et non ce n'est pas une voiture... Bref c'est de blabla.")
-    # st.write("You use the chat interface below to ask me a question?")
     st.write("Bonjour, vous pouvez utiliser la boîte de dialogue en bas de page pour interagir avec cet outil.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
