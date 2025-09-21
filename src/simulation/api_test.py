@@ -21,6 +21,7 @@ parser.add_argument(
 # 2️⃣ Parse the arguments
 args = parser.parse_args()
 
+MODEL = "gpt-5-mini-2025-08-07"
 API_URL = "https://api.openai.com/v1/responses"
 API_KEY = st.secrets["OPENAI_API_KEY"]
 OUTPUT_FILE = f"simulation_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jsonl"
@@ -65,7 +66,7 @@ async def simulate_user(session, user, group):
     await asyncio.sleep(random.uniform(0.25, 5))
     prompt = random.choice(student_prompts)
     payload = {
-        "model": "gpt-4o-mini",
+        "model":MODEL,
         "input": [
             {"role": "developer", "content": PROMPT_MAP.get(group, "")},
             {"role": "user", "content": prompt},
@@ -85,9 +86,9 @@ async def simulate_user(session, user, group):
             if resp.status != 200:
                 return f"{user} ({group}): ERROR {resp.status}"
             data = await resp.json()
-            return f"{user} ({group}): {data["output"][0]["content"][0]['text'].strip()}"
+            return user, group, 1, data
     except Exception as e:
-        return f"{user} ({group}): EXCEPTION {e}"
+        return user, group, 0, e
 
 
 async def main():
@@ -101,16 +102,10 @@ async def main():
         # for r in results:
         #     print(r)
 
-
     # Write results to file as JSONL
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         for r in results:
-            # If simulate_user returns metadata dict
-            if isinstance(r, dict):
-                f.write(json.dumps(r, ensure_ascii=False) + "\n")
-            else:
-                # In case it returns a string or exception
-                f.write(json.dumps({"raw": str(r)}) + "\n")
+            f.write(json.dumps({"raw": str(r)}) + "\n")
 
     print(f"✅ Results written to {OUTPUT_FILE}")
 
