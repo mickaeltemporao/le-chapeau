@@ -16,7 +16,6 @@ GROUP_KEY = "group"
 TITLE = "Le Chapeau"
 MODEL = "gpt-4o-mini"
 PASSWORD_FILE = Path("users.txt")
-PASSWORD_FILE = Path("users_spb.txt")
 PROMPT_MAP = {
     'a': "",
     'b': assist,
@@ -157,7 +156,7 @@ def main():
 
     st.success(
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
-        f"""⚠️ Cet outil est expérimental, si la page venait à bugger, il suffit simplement de la rafraîchir ⚠️"""
+        f"""⚠️ Cet outil est expérimental, si la page venait à bugger, il suffit de la rafraîchir ⚠️"""
     )
 
     st.write("Bonjour, vous pouvez utiliser la boîte de dialogue en bas de page pour interagir avec cet outil.")
@@ -189,7 +188,7 @@ def main():
         with st.chat_message("user"):
             st.markdown(prompt)
         # with st.spinner("Thinking..."):
-        with st.spinner("En réflexion..."):
+        with st.spinner("Je réfléchis, un instant..."):
             get_response(
                 st.session_state[USER_ID_KEY],
                 prompt,
