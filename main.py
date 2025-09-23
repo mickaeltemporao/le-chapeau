@@ -22,18 +22,15 @@ PROMPT_MAP = {
     'c': mentor,
 }
 TEXT_ID = """
-            Votre identifiant est votre adresse e-mail étudiante.
-
-            **Exemple :**
-
-            - Si votre adresse e-mail est **jeanne-marie.redon@etu.u-bordeaux.fr**
-            - identifiant = **jeanne-marie.redon@etu.u-bordeaux.fr**
-
-            ⚠️ **Important :**
-
-            * ✅ `prenom-compose.nom@etu.u-bordeaux.fr` → correct
-            * ❌ `prenomcomposenom@etu.u-bordeaux.fr` → incorrect (il manque le tiret et le point)
+            1. Votre identifiant est votre adresse e-mail étudiante de l'**Université de Bordeaux**.
+            2. Appuie sur Entrée ⏎ pour valider.
 """
+TEXT_ID2 = """
+            **Exemple :**
+            - identifiant = **jeanne-marie.redon@etu.u-bordeaux.fr**
+"""
+
+
 
 
 def load_passwords_and_groups() -> Dict[str, str]:
@@ -122,7 +119,7 @@ def main():
     )
 
     st.title(f"🎓 {TITLE}")
-    st.warning("Notez que cet outil est expérimental, si la page venait à bugger, il suffit de la rafraîchir.", icon="⚠️")
+    st.warning("Cet outil est expérimental. En cas de bug ou de blocage, vous pouvez relancer votre requête ou rafraîchir la page.", icon="⚠️")
 
     # Initialize session state
     if not st.session_state.get(SESSION_ID_KEY):
@@ -135,9 +132,11 @@ def main():
     if not st.session_state.authenticated:
         st.header("🔐 Identification")
 
+        st.write(TEXT_ID)
+
         input_password = st.text_input("Entrez votre identifiant")
 
-        st.write(TEXT_ID)
+        st.write(TEXT_ID2)
 
         if input_password:
             username = clean_input(input_password)
