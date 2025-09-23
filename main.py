@@ -33,8 +33,6 @@ TEXT_ID = """
 
             * ✅ `prenom-compose.nom@etu.u-bordeaux.fr` → correct
             * ❌ `prenomcomposenom@etu.u-bordeaux.fr` → incorrect (il manque le tiret et le point)
-
-            Saisissez votre identifiant dans le champ ci-dessous, puis CLIQUEZ sur le bouton **"Se connecter"**.
 """
 
 
@@ -124,6 +122,7 @@ def main():
     )
 
     st.title(f"🎓 {TITLE}")
+    st.warning("Notez que cet outil est expérimental, si la page venait à bugger, il suffit de la rafraîchir.", icon="⚠️")
 
     # Initialize session state
     if not st.session_state.get(SESSION_ID_KEY):
@@ -136,13 +135,11 @@ def main():
     if not st.session_state.authenticated:
         st.header("🔐 Identification")
 
+        input_password = st.text_input("Entrez votre identifiant")
+
         st.write(TEXT_ID)
 
-        input_password = st.text_input("Entrez votre identifiant", type="password")
-        # st.write(f"Utilisez un des noms suivants: {', '.join(PASSWORDS.keys())}.")
-        authenticate_button = st.button("Se connecter")
-
-        if authenticate_button:
+        if input_password:
             username = clean_input(input_password)
             if check_password(username):
                 st.session_state.authenticated = True
@@ -151,15 +148,14 @@ def main():
                 st.success(f"Authentification réussie !")
                 st.rerun()
             else:
-                st.error("Veuillez entrer votre identifiant. ")
+                st.error("Veuillez entrer un identifiant valide. ")
         return
+
 
     st.success(
         # f"Bonjour {st.session_state[USER_ID_KEY].title()}, tu es dans le groupe '{st.session_state[GROUP_KEY].upper()}'."
-        f"""⚠️ Cet outil est expérimental, si la page venait à bugger, il suffit de la rafraîchir ⚠️"""
+        f"""Vous êtes connecté. Utilisez la boîte de dialogue en bas de page pour vos requêtes."""
     )
-
-    st.write("Bonjour, vous pouvez utiliser la boîte de dialogue en bas de page pour interagir avec cet outil.")
 
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
