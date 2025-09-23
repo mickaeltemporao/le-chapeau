@@ -180,7 +180,7 @@ def main():
             st.markdown(message["content"])
 
     if prompt := st.chat_input(
-        "Enter you request here...",
+        "Entrez votre demande ici...",
     ):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
