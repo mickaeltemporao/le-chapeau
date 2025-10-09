@@ -9,6 +9,7 @@ dependencies = [
     "ipython>=9.4.0",
     "locust>=2.40.5",
     "openai>=1.101.0",
+    "pandas>=2.3.2",
     "pydantic>=2.11.7",
     "pyngrok>=7.3.0",
     "streamlit>=1.47.0",

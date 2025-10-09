@@ -1,8 +1,23 @@
+"""Early descriptive analysis draft."""
+import ast
 import json
 import pandas as pd
 from collections import Counter
 
-RESULTS_FILE = "simulation_results.jsonl"
+RESULTS_FILE = "data/logs_index.jsonl"
+
+# Convert strings to dicts if necessary
+def ensure_dict(x):
+    if isinstance(x, dict):
+        return x
+    elif isinstance(x, str) and x.strip():
+        try:
+            return ast.literal_eval(x)
+        except Exception:
+            return {}
+    else:
+        return {}
+
 
 def load_results(file_path=RESULTS_FILE):
     """Load JSONL results into a pandas DataFrame."""
@@ -28,10 +43,15 @@ def analyze(df):
 
 if __name__ == "__main__":
     df = load_results()
-    df[["user", "group", "text"]] = df["raw"].str.extract(r'^(.*?) \((.*?)\):\s*(.*)$')
-    if df.empty:
-        print("No results loaded. Did you run the simulation?")
-    else:
-        print(analyze(df))
-
+    df['metadata'] = df['metadata'].apply(ensure_dict)
+    df['user'] = df['metadata'].apply(lambda x: x.get('user', None))
+    df['group'] = df['metadata'].apply(lambda x: x.get('group', None))
+    df = df.dropna(subset=['user', 'group'])
+    df =  df[df['group'].isin(['b', 'c'])]
+    # Count requests per user per group
+    counts = df.groupby(['group', 'user']).size().reset_index(name='requests')
+    avg_requests = counts.groupby('group')['requests'].mean().reset_index(name='avg_requests')
+    print(avg_requests)
+    total_per_group = df.groupby('group').size().reset_index(name='total_requests')
+    print(total_per_group)
 
