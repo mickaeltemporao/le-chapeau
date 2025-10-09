@@ -14,21 +14,48 @@ The goal of this project is to help **teachers, students, and researchers** unde
 
 ## 🚀 Getting Started
 
-### 0. Install the environment
+### 0. Install `uv`
 
-This project uses [**uv**](https://docs.astral.sh/uv/) for dependency management.
-If you don’t have it installed yet:
+[`uv`](https://docs.astral.sh/uv/) is a fast Python package and environment manager.
+
+Install via your preferred package manager:
+
+**macOS / Linux (Homebrew):**
 
 ```bash
-pip install uv
+brew install uv
 ```
 
-### 1. Create and activate the environment
+**Using pipx (recommended cross-platform):**
+
+```bash
+pipx install uv
+```
+
+You can verify the installation with:
+
+```bash
+uv --version
+```
+
+---
+
+### 1. Set up the environment
+
+Create a virtual environment (if one doesn’t exist) and install dependencies:
 
 ```bash
 uv venv
+uv sync
+```
+
+Then activate the environment:
+
+```bash
 source .venv/bin/activate
 ```
+
+---
 
 ### 2. Run the app
 
@@ -53,25 +80,19 @@ You can use **nginx** for load balancing between worker instances.
 1. Install and start nginx:
 
    ```bash
-   brew install nginx
+   pacman install nginx
    ```
 2. Move the provided config file:
 
    ```bash
-   mv nginx.conf /opt/homebrew/etc/nginx/nginx.conf
+   sudo mv nginx.conf /opt/homebrew/etc/nginx/nginx.conf
    ```
 3. Start workers and restart nginx:
 
    ```bash
    ./start_workers.sh
-   brew services restart nginx
+   systemctl restart nginx
    ```
-4. Get your local IP:
-
-   ```bash
-   ipconfig getifaddr en0
-   ```
-
 Others on your local network can then access the app via:
 
 ```
@@ -82,8 +103,9 @@ http://<your-local-ip>:8501
 
 ## 🌐 TODO
 
-* [ ] Add instructions for deploying on a public web server (e.g. AWS, GCP, or Render)
-* [ ] Automate environment setup via a script or Dockerfile
+* [ ] Add deployment instructions for a public web host (AWS, GCP, Render, etc.)
+* [ ] Add Dockerfile for containerized deployment
+* [ ] Include auto-sync step in startup script
 
 ---
 
