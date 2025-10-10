@@ -103,6 +103,7 @@ http://<your-local-ip>:8501
 
 ## 🌐 TODO
 
+* [ ] Fix paths for new folder structure
 * [ ] Add deployment instructions for a public web host (AWS, GCP, Render, etc.)
 * [ ] Add Dockerfile for containerized deployment
 * [ ] Include auto-sync step in startup script
