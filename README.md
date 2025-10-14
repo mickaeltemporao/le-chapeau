@@ -1,4 +1,4 @@
-# 🧠 Socratic AI Agent | Experimental Toolbox
+# 🧠 Le Chapeau - Socratic AI Agent & A/B Testing Toolbox
 
 **Can we adjust the way we interact with LLMs to help students learn better?**
 
