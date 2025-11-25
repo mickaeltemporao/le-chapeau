@@ -17,7 +17,7 @@ The goal of this project is to help **teachers, students, and researchers** unde
 
 ### 0. Install `uv`
 
-[`uv`](https://docs.astral.sh/uv/) is a fast Python package and environment manager.
+[`uv`](https://docs.astral.sh/uv/) is a Python package and environment manager.
 
 Install via your preferred package manager:
 
