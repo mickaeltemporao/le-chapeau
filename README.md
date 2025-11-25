@@ -1,4 +1,5 @@
-# 🧠 Le Chapeau - Socratic AI Agent & A/B Testing Toolbox
+# 🎓 Le Chapeau 🎓
+## An A/B Testing Toolbox to a Socratic AI Agent
 
 **Can we adjust the way we interact with LLMs to help students learn better?**
 
@@ -12,7 +13,7 @@ The goal of this project is to help **teachers, students, and researchers** unde
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 0. Install `uv`
 
@@ -73,7 +74,7 @@ streamlit run main.py
 
 ---
 
-## ⚙️ Running with Load Balancer (optional)
+## Running with Load Balancer (optional)
 
 You can use **nginx** for load balancing between worker instances.
 
@@ -101,7 +102,7 @@ http://<your-local-ip>:8501
 
 ---
 
-## 🌐 TODO
+## TODO
 
 * [ ] Fix paths for new folder structure
 * [ ] Add deployment instructions for a public web host (AWS, GCP, Render, etc.)
@@ -110,7 +111,7 @@ http://<your-local-ip>:8501
 
 ---
 
-## 🧪 Load Testing with Locust
+## Load Testing with Locust
 
 You can run load tests on your deployment to simulate multiple users.
 
@@ -128,13 +129,13 @@ http://localhost:8089
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, experiments, and feedback are welcome!
 This project is experimental and open-ended — designed to grow with community input on how to best integrate **AI-assisted learning** in educational settings.
 
 ---
 
-## 📜 License
+## License
 
 This project is open-sourced under the [GNU GPLv3](LICENSE).
