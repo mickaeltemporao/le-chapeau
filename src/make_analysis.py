@@ -126,24 +126,30 @@ def prompt_length_features(df: pd.DataFrame) -> pd.DataFrame:
 ########################################
 
 DIRECT_PATTERNS = [
-    r"^what is",
-    r"^give me",
-    r"^define",
-    r"^answer",
-    r"résume",
-    r"donne la réponse"
+    r"^qu'est-ce que",
+    r"^c'est quoi",
+    r"^donne(-moi)?",
+    r"^donne la réponse",
+    r"^définis",
+    r"^définir",
+    r"^réponds",
+    r"^résume",
+    r"^liste",
+    r"^quel(le)? est"
 ]
 
 TUTORING_PATTERNS = [
-    r"explain",
-    r"why",
-    r"how does",
-    r"walk me through",
-    r"step by step",
+    r"explique",
+    r"peux-tu expliquer",
+    r"comment",
+    r"comment fonctionne",
     r"pourquoi",
-    r"explique"
+    r"quelle est la raison",
+    r"étape(s)?",
+    r"pas à pas",
+    r"décris le processus",
+    r"aide-moi à comprendre"
 ]
-
 
 def classify_learning_style(prompt: str) -> str:
     """
