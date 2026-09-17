@@ -1,0 +1,14 @@
+# Pre-registered participant roster for Le Chapeau study
+# Format: email_or_identifier,group
+# Groups:
+#   a = Control (standard base model)
+#   b = Assist (helpful assistant)
+#   c = Mentor (Socratic questioning agent)
+
+alice.dupont@etu.u-bordeaux.fr,a
+bob.martin@etu.u-bordeaux.fr,a
+claire.bernard@etu.u-bordeaux.fr,b
+david.thomas@etu.u-bordeaux.fr,b
+emma.richard@etu.u-bordeaux.fr,c
+felix.petit@etu.u-bordeaux.fr,c
+test.user@etu.u-bordeaux.fr,c

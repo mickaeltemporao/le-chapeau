@@ -1,141 +1,179 @@
 # 🎓 Le Chapeau 🎓
-## An A/B Testing Toolbox to a Socratic AI Agent
+### An A/B Testing Platform for Socratic AI in Education
 
 **Can we adjust the way we interact with LLMs to help students learn better?**
 
-This repository provides a framework to **deploy and test an experimental AI agent** designed for educational research.
-Participants are automatically assigned to either a **control group** or a **test group**.
-
-* The **control group** interacts with a standard LLM agent.
-* The **test group** interacts with a **Socratic agent**, which adopts a questioning, reflective approach meant to encourage deeper thinking and active learning.
-
-The goal of this project is to help **teachers, students, and researchers** understand how AI can support skill development and critical thinking — and to explore how **interaction design** influences learning outcomes.
+**Le Chapeau** is a turnkey experimental platform designed for educational and behavioral researchers. It lets teachers and researchers deploy a controlled web chat application where participants are assigned to different AI interaction paradigms (e.g. standard direct assistant vs. Socratic questioning tutor), while automatically logging interactions with **real-time disk persistence** and **salted deterministic anonymization**.
 
 ---
 
-## Getting Started
+## 🔬 Experimental Conditions
 
-### 0. Install `uv`
+Participants are assigned to one of three groups:
 
-[`uv`](https://docs.astral.sh/uv/) is a Python package and environment manager.
-
-Install via your preferred package manager:
-
-**macOS / Linux (Homebrew):**
-
-```bash
-brew install uv
-```
-
-**Using pipx (recommended cross-platform):**
-
-```bash
-pipx install uv
-```
-
-You can verify the installation with:
-
-```bash
-uv --version
-```
+* **Group A (Control)**: Interacts with the baseline LLM without additional pedagogical scaffolding.
+* **Group B (Assist)**: Interacts with a helpful, direct instructional assistant.
+* **Group C (Mentor / Socratic)**: Interacts with a **Socratic agent** that refuses to simply hand over answers, instead using guided questions, step-by-step scaffolding, and reflective prompts to foster deep learning.
 
 ---
 
-### 1. Set up the environment
+## 🚀 Quick Start for Researchers
 
-Create a virtual environment (if one doesn’t exist) and install dependencies:
+### 1. Requirements
+* macOS or Linux
+* An OpenAI API Key
+
+### 2. Configure API Key
+Create a `.streamlit/secrets.toml` file or set the environment variable:
 
 ```bash
-uv venv
+mkdir -p .streamlit
+echo 'OPENAI_API_KEY = "sk-..."' > .streamlit/secrets.toml
+```
+
+*(Alternatively: `export OPENAI_API_KEY="sk-..."`)*
+
+---
+
+### Option A: Interactive Assistant (Recommended)
+
+Run the guided setup script:
+
+```bash
+./deploy.sh
+```
+
+This will automatically configure limits, verify dependencies, and print the local access link to share with students (e.g., `http://192.168.1.50:8501`).
+
+---
+
+### Option B: Docker Compose
+
+If you or your university sysadmin prefer running via Docker:
+
+```bash
+# Start container in the background
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop container
+docker compose down
+```
+
+> **Data Safety Guarantee**: All study data (`data/`), configurations (`config/`), and secrets (`.streamlit/`) are mounted directly from your host machine. Containers can be rebuilt or stopped at any time without losing student rosters or conversation logs.
+
+---
+
+### Option C: Direct Python Execution with `uv`
+
+Install [uv](https://docs.astral.sh/uv/) if you haven't already:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Sync environment and launch:
+```bash
 uv sync
+uv run chapeau
 ```
 
-Then activate the environment:
-
+Or run Streamlit directly:
 ```bash
-source .venv/bin/activate
+uv run streamlit run src/chapeau/app.py
 ```
 
 ---
 
-### 2. Run the app
+## 👥 Participant Management & Roster
 
-Before launching, increase the file descriptor limit (macOS/Linux):
+The participant list is managed in `data/users.txt`:
 
-```bash
-ulimit -n 20000
+```text
+# Format: email_or_identifier,group
+alice.dupont@etu.u-bordeaux.fr,a
+bob.martin@etu.u-bordeaux.fr,b
+claire.bernard@etu.u-bordeaux.fr,c
 ```
 
-Then start the Streamlit app:
+### Auto-Enrollment (Optional)
+If you want students not on the roster to be automatically admitted during an open lecture, set the environment variable:
 
 ```bash
-streamlit run main.py
+export CHAPEAU_AUTO_ENROLL=true
 ```
+
+When enabled, any unknown student logging in will be assigned to the least-populated group to maintain balanced sample cohorts, and their assignment will be automatically recorded in `data/users.txt`.
 
 ---
 
-## Running with Load Balancer (optional)
+## 📊 Data Persistence & Anonymized CSV Export
 
-You can use **nginx** for load balancing between worker instances.
+### Zero Data Loss
+Every chat interaction is written **in real time** to `data/logs/chat_logs.jsonl`. Even if a student abruptly closes their browser or the server restarts, all interactions are safely saved to disk.
 
-1. Install and start nginx:
+### Exporting to CSV with Salted Anonymization
+To generate a research-ready CSV for your statistical analysis (R, Python, Stata, Excel):
 
+```bash
+uv run chapeau export
+```
+
+This exports to `data/exports/chapeau_interactions.csv`.
+
+#### Consistent Cross-Study Anonymization
+To comply with IRB/GDPR standards without breaking longitudinal research:
+- Personal student emails are converted into a **salted deterministic UUIDv5**.
+- If a student participates in multiple experiments using the same study salt (`config/salt.txt`), they will have the **exact same UUID across all studies**, allowing researchers to track student progress over time without revealing personal identifying details.
+- To export un-anonymized data (e.g. for grading purposes):
+  ```bash
+  uv run chapeau export --no-anonymize
+  ```
+
+---
+
+## 🏫 High-Concurrency Classroom Deployment
+
+When hosting 100+ concurrent students simultaneously during a lecture, use the multi-worker cluster with Nginx:
+
+1. **Start 4 background worker instances:**
    ```bash
-   pacman install nginx
+   ./scripts/start_workers.sh
    ```
-2. Move the provided config file:
-
+2. **Apply the provided Nginx configuration:**
+   Copy [config/nginx.conf](config/nginx.conf) to your Nginx directory (e.g., `/etc/nginx/nginx.conf` or `/opt/homebrew/etc/nginx/nginx.conf`), and reload Nginx:
    ```bash
-   sudo mv nginx.conf /opt/homebrew/etc/nginx/nginx.conf
+   sudo systemctl reload nginx
    ```
-3. Start workers and restart nginx:
-
+3. **Stop workers after the session:**
    ```bash
-   ./start_workers.sh
-   systemctl restart nginx
+   ./scripts/stop_workers.sh
    ```
-Others on your local network can then access the app via:
 
-```
-http://<your-local-ip>:8501
+---
+
+## 📦 Python Package Usage
+
+You can also use `chapeau` directly as a Python library:
+
+```python
+import chapeau
+from chapeau.prompts import assist, mentor, get_prompt_for_group
+from chapeau.export import export_logs_to_dataframe, anonymize_user_id
+from chapeau.auth import StudyAuth
+
+# Authenticate a student
+auth = StudyAuth()
+is_valid, group = auth.authenticate("student@etu.u-bordeaux.fr")
+
+# Load and anonymize study logs into a pandas DataFrame
+df = export_logs_to_dataframe(anonymize=True)
+print(df.head())
 ```
 
 ---
 
-## TODO
+## 📄 License
 
-* [ ] Fix paths for new folder structure
-* [ ] Add deployment instructions for a public web host (AWS, GCP, Render, etc.)
-* [ ] Add Dockerfile for containerized deployment
-* [ ] Include auto-sync step in startup script
-
----
-
-## Load Testing with Locust
-
-You can run load tests on your deployment to simulate multiple users.
-
-Start Locust:
-
-```bash
-locust -f locustfile.py --host http://<your-server-ip>
-```
-
-Then open the Locust web UI:
-
-```
-http://localhost:8089
-```
-
----
-
-## Contributing
-
-Contributions, experiments, and feedback are welcome!
-This project is experimental and open-ended — designed to grow with community input on how to best integrate **AI-assisted learning** in educational settings.
-
----
-
-## License
-
-This project is open-sourced under the [GNU GPLv3](LICENSE).
+This project is licensed under the GNU General Public License v3 ([LICENSE](LICENSE)).

@@ -1,23 +1,24 @@
 #!/bin/bash
 
-# Path to your Streamlit app
-APP_PATH="/Users/mt/Documents/paper-socrates/main.py"
-# Base port (first worker runs on 8501, then 8502, etc.)
+# Dynamically locate project root
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+APP_PATH="$PROJECT_ROOT/src/chapeau/app.py"
 BASE_PORT=8501
-# Number of workers you want
-WORKERS=4
+WORKERS=${WORKERS:-4}
 
-# Kill all processes running the Streamlit app
-pkill -f "streamlit run $APP_PATH"
+echo "🛑 Stopping Le Chapeau Streamlit workers..."
 
-# Optionally, kill any processes using the specified ports
-for i in $(seq 0 $((WORKERS-1))); do
-    PORT=$((BASE_PORT+i))
-    PID=$(lsof -ti :$PORT)
+# Kill any processes running this app
+pkill -f "streamlit run.*chapeau" 2>/dev/null || true
+
+# Kill any processes using the worker ports
+for i in $(seq 0 $((WORKERS - 1))); do
+    PORT=$((BASE_PORT + i))
+    PID=$(lsof -ti :$PORT 2>/dev/null || true)
     if [ -n "$PID" ]; then
-        echo "Killing process on port $PORT (PID: $PID)"
-        kill -9 $PID
+        echo "  Killing process on port $PORT (PID: $PID)"
+        kill -9 $PID 2>/dev/null || true
     fi
 done
 
-echo "All Streamlit workers have been terminated."
+echo "✅ All Streamlit workers have been terminated."

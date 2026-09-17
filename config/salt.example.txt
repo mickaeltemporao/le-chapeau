@@ -1,0 +1,3 @@
+# Persistent study salt for deterministic participant anonymization
+# Replace this random string with your own secret study salt for your research project
+chapeau-study-salt-change-me-in-production-2026

@@ -1,0 +1,18 @@
+services:
+  chapeau:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chapeau_app
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CHAPEAU_MODEL=${CHAPEAU_MODEL:-gpt-4o-mini}
+      - CHAPEAU_AUTO_ENROLL=${CHAPEAU_AUTO_ENROLL:-false}
+    volumes:
+      # Persistent host volume mounts: nothing is lost if containers stop or rebuild
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./.streamlit:/app/.streamlit
