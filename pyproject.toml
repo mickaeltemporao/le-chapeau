@@ -1,7 +1,7 @@
 [project]
 name = "chapeau"
 version = "0.1.0"
-description = "A/B testing toolbox for Socratic educational AI agents"
+description = "Turnkey A/B testing platform for conversational AI agents and LLM interactions"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

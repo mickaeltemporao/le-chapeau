@@ -1,5 +1,5 @@
 # 🎓 Le Chapeau 🎓
-### An A/B Testing Platform for Socratic AI in Education
+### An Open-Source A/B Testing Platform for Conversational AI and LLM Interactions
 
 **Can we adjust the way we interact with LLMs to help students learn better?**
 
@@ -181,7 +181,7 @@ If you use **Le Chapeau** in your academic research or teaching experiments, ple
 ```bibtex
 @software{temporao2026chapeau,
   author       = {Mickael Tempor{\~a}o},
-  title        = {Le Chapeau: An A/B Testing Platform for Socratic AI in Education},
+  title        = {Le Chapeau: An Open-Source A/B Testing Platform for Conversational AI and LLM Interactions},
   year         = {2026},
   version      = {0.1.0},
   url          = {https://github.com/mickaeltemporao/paper-socrates}
