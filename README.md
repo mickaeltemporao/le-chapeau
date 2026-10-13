@@ -174,6 +174,22 @@ print(df.head())
 
 ---
 
+## 📚 Citation
+
+If you use **Le Chapeau** in your academic research or teaching experiments, please cite it using the metadata from `CITATION.cff`:
+
+```bibtex
+@software{temporao2026chapeau,
+  author       = {Mickael Tempor{\~a}o},
+  title        = {Le Chapeau: An A/B Testing Platform for Socratic AI in Education},
+  year         = {2026},
+  version      = {0.1.0},
+  url          = {https://github.com/mickaeltemporao/paper-socrates}
+}
+```
+
+---
+
 ## 📄 License
 
 This project is licensed under the GNU General Public License v3 ([LICENSE](LICENSE)).

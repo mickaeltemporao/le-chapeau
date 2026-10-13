@@ -1,0 +1,21 @@
+{
+  "title": "Le Chapeau: An A/B Testing Platform for Socratic AI in Education",
+  "description": "Le Chapeau is a turnkey experimental platform designed for educational and behavioral researchers to deploy controlled web chat applications comparing AI interaction paradigms (such as baseline control, direct instructional assistant, and Socratic questioning tutor) with real-time data persistence and salted deterministic anonymization.",
+  "creators": [
+    {
+      "name": "Temporão, Mickael"
+    }
+  ],
+  "access_right": "open",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "artificial intelligence",
+    "education",
+    "socratic method",
+    "a/b testing",
+    "educational technology",
+    "large language models",
+    "pedagogical agents"
+  ],
+  "upload_type": "software"
+}
